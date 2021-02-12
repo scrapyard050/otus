@@ -14,48 +14,59 @@ void Prepare(FILE *file, long *all_byets )
 }
 
 
+// 3 итерация 38
 void Decode( const char buffer[], const size_t *len_buffer, char result [] )
 {
-    for( size_t it = 0; it < *len_buffer/2;  it++)
+ 
+    for( size_t it = 0; it < *len_buffer;  it++)
     {
-        unsigned int unicode = 0;
+        if (buffer[it] == '\x00')
+        {
+            continue;
+        }
+        
         for( size_t count = 0; count < sizeof(cp1251)/sizeof(cp1251[0]);  count++ )
         {
         
+           
             if( buffer[it] == cp1251[count].hex_code )
             {
-                unicode = cp1251[count].unicode_code;
-                break;
+                unsigned int unicode = cp1251[count].unicode_code;
+                // 1 байт для хранения символа
+                if( unicode < 0x80)
+                {
+                    result[counter++] = unicode;
+                    break;
+                }
+                // 2 байт для хранения символа
+                else if( unicode < 0x800 )
+                {
+                    result[counter++] = ( unicode>>6 ) | 0xC0;
+                    result[counter++] = ( unicode & 0x3F ) | 0x80;
+                    break;
+                }
+                
+                // 3 байт для хранения символа
+//                else if( unicode < 0x10000 )
+//                {
+//                    result[ counter++ ] = ( unicode >> 12 ) | 0xe0;
+//                    result[ counter++ ] =  (unicode >> 6  & 0x3f) | 0x80;
+//                    result[ counter++ ] =  (unicode & 0x3f) | 0x80;
+//                }
+//                // 4 байт для хранения символа
+//                else if( unicode < 0x200000 )
+//                {
+//                    result[ counter++ ] = unicode >> 18 | 0xf0;
+//                    result[ counter++ ] = (unicode >> 12 & 0x3f) | 0x80;
+//                    result[ counter++ ] = (unicode >> 6 & 0x3f) | 0x80;
+//                    result[ counter++ ] = (unicode & 0x3f) | 0x80;
+//                }
             }
             
         }
         
-        // 1 байт для хранения символа
-        if( unicode < 0x80)
-        {
-            result[counter++] = unicode;
-        }
-        // 2 байт для хранения символа
-        else if( unicode < 0x800 )
-        {
-            result[counter++] = ( unicode>>6 ) | 0xC0;
-            result[counter++] = ( unicode & 0x3F ) | 0x80;
-        }
-        // 3 байт для хранения символа
-        else if( unicode < 0x10000 )
-        {
-            result[ counter++ ] = ( unicode >> 12 ) | 0xe0;
-            result[ counter++ ] =  (unicode >> 6  & 0x3f) | 0x80;
-            result[ counter++ ] =  (unicode & 0x3f) | 0x80;
-        }
-        // 1 байт для хранения символа
-        else if( unicode < 0x200000 )
-        {
-            result[ counter++ ] = unicode >> 18 | 0xf0;
-            result[ counter++ ] = (unicode >> 12 & 0x3f) | 0x80;
-            result[ counter++ ] = (unicode >> 6 & 0x3f) | 0x80;
-            result[ counter++ ] = (unicode & 0x3f) | 0x80;
-        }
+       
+
     }
 }
 
