@@ -2,7 +2,7 @@
 #include <string.h>
 #include "cp1251.h"
 
-static long counter = 0;
+static unsigned int counter = 0;
 
 /// Получаем размер байтов в файле
 ///
@@ -17,21 +17,14 @@ void Prepare(FILE *file, long *all_byets )
 // 3 итерация 38
 void Decode( const char buffer[], const size_t *len_buffer, char result [] )
 {
- 
     for( size_t it = 0; it < *len_buffer;  it++)
     {
-        if (buffer[it] == '\x00')
-        {
-            continue;
-        }
-        
         for( size_t count = 0; count < sizeof(cp1251)/sizeof(cp1251[0]);  count++ )
         {
-        
-           
             if( buffer[it] == cp1251[count].hex_code )
             {
                 unsigned int unicode = cp1251[count].unicode_code;
+            
                 // 1 байт для хранения символа
                 if( unicode < 0x80)
                 {
@@ -43,30 +36,25 @@ void Decode( const char buffer[], const size_t *len_buffer, char result [] )
                 {
                     result[counter++] = ( unicode>>6 ) | 0xC0;
                     result[counter++] = ( unicode & 0x3F ) | 0x80;
-                    break;
                 }
-                
                 // 3 байт для хранения символа
-//                else if( unicode < 0x10000 )
-//                {
-//                    result[ counter++ ] = ( unicode >> 12 ) | 0xe0;
-//                    result[ counter++ ] =  (unicode >> 6  & 0x3f) | 0x80;
-//                    result[ counter++ ] =  (unicode & 0x3f) | 0x80;
-//                }
-//                // 4 байт для хранения символа
-//                else if( unicode < 0x200000 )
-//                {
-//                    result[ counter++ ] = unicode >> 18 | 0xf0;
-//                    result[ counter++ ] = (unicode >> 12 & 0x3f) | 0x80;
-//                    result[ counter++ ] = (unicode >> 6 & 0x3f) | 0x80;
-//                    result[ counter++ ] = (unicode & 0x3f) | 0x80;
-//                }
+                else if( unicode < 0x10000 )
+                {
+                    result[ counter++ ] = ( unicode >> 12 ) | 0xe0;
+                    result[ counter++ ] =  (unicode >> 6  & 0x3f) | 0x80;
+                    result[ counter++ ] =  (unicode & 0x3f) | 0x80;
+                }
+                // 4 байт для хранения символа
+                else if( unicode < 0x200000 )
+                {
+                    result[ counter++ ] = unicode >> 18 | 0xf0;
+                    result[ counter++ ] = (unicode >> 12 & 0x3f) | 0x80;
+                    result[ counter++ ] = (unicode >> 6 & 0x3f) | 0x80;
+                    result[ counter++ ] = (unicode & 0x3f) | 0x80;
+                }
             }
             
         }
-        
-       
-
     }
 }
 
@@ -74,15 +62,14 @@ void Decode( const char buffer[], const size_t *len_buffer, char result [] )
 ///
 int DecodeCp1251( FILE *file, const long *all_byets, char result[] )
 {
-    size_t read_bytes = 0;
-    const char byte = 1;
     const size_t len_buffer = 256;
-    while ( read_bytes < *all_byets)
+    char buffer[len_buffer];
+    while (fgets(buffer, len_buffer - 1, file))
     {
-        char buffer[len_buffer] = {0};
-        read_bytes += fread(buffer, byte, len_buffer, file);
-        fseek(file, read_bytes, SEEK_SET);
+        counter = 0;
+        buffer[strcspn(buffer, "\n")] = 0;
         Decode(buffer, &len_buffer, result);
+        printf("%s\n", result);
     }
     
     return 0;
@@ -105,14 +92,14 @@ int main(int argc, const char * argv[])
         return 2;
     }
     
-    char result[4096] = {0};
     long all_bytes = 0;
     Prepare(file, &all_bytes);
+    char result[all_bytes*2];
+    all_bytes *= 2;
     DecodeCp1251(file, &all_bytes, result);
     
     fclose(file);
-    
-   return 0;
+    return 0;
 }
 
 
