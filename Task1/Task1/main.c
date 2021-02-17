@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "cp1251.h"
+#include "koi8.h"
+#include "iso_8859_5.h"
 
 static unsigned int counter = 0;
 

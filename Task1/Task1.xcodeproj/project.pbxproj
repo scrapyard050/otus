@@ -23,6 +23,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		104CE84C25DDC8BC009D236E /* koi8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = koi8.h; sourceTree = "<group>"; };
+		104CE84E25DDD3C2009D236E /* iso_8859_5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iso_8859_5.h; sourceTree = "<group>"; };
 		10BD2B9C25D3318600F0B219 /* Task1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Task1; sourceTree = BUILT_PRODUCTS_DIR; };
 		10BD2B9F25D3318600F0B219 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		10D0E23C25D5A9DA009921E9 /* cp1251.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cp1251.h; sourceTree = "<group>"; };
@@ -60,6 +62,8 @@
 			children = (
 				10BD2B9F25D3318600F0B219 /* main.c */,
 				10D0E23C25D5A9DA009921E9 /* cp1251.h */,
+				104CE84C25DDC8BC009D236E /* koi8.h */,
+				104CE84E25DDD3C2009D236E /* iso_8859_5.h */,
 			);
 			path = Task1;
 			sourceTree = "<group>";
