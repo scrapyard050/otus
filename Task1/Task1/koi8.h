@@ -5,7 +5,7 @@
 typedef struct koi8Data
 {
     char hex_code;
-    unsigned short unicode_code;
+    unsigned int unicode_code;
 }  koi8Data;
 
 static const struct koi8Data koi8r[256]= {
