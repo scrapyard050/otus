@@ -114,7 +114,7 @@ void Decode( const char buffer[], const char* encoding, char result [] )
 
 /// Чтение  файла
 ///
-int DecodeData( FILE *file_reading_descriptor, FILE *file_result_descriptor, const char *encoding )
+void DecodeData( FILE *file_reading_descriptor, FILE *file_result_descriptor, const char *encoding )
 {
     long all_bytes = 0;
     Prepare(file_reading_descriptor, &all_bytes);
@@ -128,8 +128,6 @@ int DecodeData( FILE *file_reading_descriptor, FILE *file_result_descriptor, con
         //printf("%s\n", result);
         fprintf(file_result_descriptor, "%s", result);
     }
-    
-    return 0;
 }
 
 int main(int argc, const char * argv[])
