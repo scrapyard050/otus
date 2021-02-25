@@ -50,7 +50,7 @@ static uint8_t *read_file(const char *filename, size_t *file_sz)
 int main(int argc, const char * argv[]) {
     size_t file_size;
     uint8_t *file_data = read_file(argv[1], &file_size);
-    struct eocdr info;
+    eocdr info;
     bool result = find_eocdr(&info, file_data, file_size);
     return 0;
 }
