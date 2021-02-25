@@ -25,6 +25,9 @@
 /* Begin PBXFileReference section */
 		1047B74925E8409700F8012F /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
 		1047B74B25E8414200F8012F /* eocdr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = eocdr.h; sourceTree = "<group>"; };
+		1047B74F25E849BA00F8012F /* cfh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cfh.h; sourceTree = "<group>"; };
+		1047B75125E84B7000F8012F /* lfh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lfh.h; sourceTree = "<group>"; };
+		1047B75325E84FA600F8012F /* zip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
 		107D5A9825E053F000C1DDF5 /* Task2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Task2; sourceTree = BUILT_PRODUCTS_DIR; };
 		107D5A9B25E053F000C1DDF5 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,6 +65,9 @@
 				107D5A9B25E053F000C1DDF5 /* main.c */,
 				1047B74925E8409700F8012F /* global.h */,
 				1047B74B25E8414200F8012F /* eocdr.h */,
+				1047B74F25E849BA00F8012F /* cfh.h */,
+				1047B75125E84B7000F8012F /* lfh.h */,
+				1047B75325E84FA600F8012F /* zip.h */,
 			);
 			path = Task2;
 			sourceTree = "<group>";

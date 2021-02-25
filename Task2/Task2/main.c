@@ -1,8 +1,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "global.h"
-#include "eocdr.h"
+#include "zip.h"
+
 
 #define PERROR_IF(cond, msg) if (cond) { perror(msg); exit(1); }
 
@@ -47,10 +47,38 @@ static uint8_t *read_file(const char *filename, size_t *file_sz)
         return buf;
 }
 
+static void list_zip(const char *filename)
+{
+        uint8_t *zip_data;
+        size_t zip_sz;
+        zip_t z;
+        zipiter_t it;
+        zipmemb_t m;
+
+        printf("Listing ZIP archive: %s\n\n", filename);
+
+        zip_data = read_file(filename, &zip_sz);
+
+        if (!zip_read(&z, zip_data, zip_sz)) {
+                printf("Failed to parse ZIP file!\n");
+                exit(1);
+        }
+
+        if (z.comment_len != 0) {
+                printf("%.*s\n\n", (int)z.comment_len, z.comment);
+        }
+
+        for (it = z.members_begin; it != z.members_end; it = m.next) {
+                m = zip_member(&z, it);
+                printf("%.*s\n", (int)m.name_len, m.name);
+        }
+
+        printf("\n");
+
+        free(zip_data);
+}
+
 int main(int argc, const char * argv[]) {
-    size_t file_size;
-    uint8_t *file_data = read_file(argv[1], &file_size);
-    eocdr info;
-    bool result = find_eocdr(&info, file_data, file_size);
+    list_zip(argv[1]);
     return 0;
 }

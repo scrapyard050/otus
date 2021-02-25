@@ -3,7 +3,7 @@
 
 #include "global.h"
 
-typedef struct eocdr {
+struct eocdr {
         uint16_t disk_nbr;        /* Number of this disk. */
         uint16_t cd_start_disk;   /* Nbr. of disk with start of the CD. */
         uint16_t disk_cd_entries; /* Nbr. of CD entries on this disk. */
@@ -12,7 +12,7 @@ typedef struct eocdr {
         uint32_t cd_offset;       /* Central Directory file offset. */
         uint16_t comment_len;     /* Archive comment length. */
         const uint8_t *comment;   /* Archive comment. */
-}eocdr;
+};
 
 
 
@@ -26,7 +26,7 @@ typedef struct eocdr {
 /// @param[in] src содержимое файла
 /// @param[in] src_len размер файла
 ///
-bool find_eocdr( eocdr *eocdr_info, const uint8_t *src, size_t src_len )
+bool find_eocdr( struct eocdr *eocdr_info, const uint8_t *src, size_t src_len )
 {
     for (size_t comment_len = 0; comment_len <= UINT16_MAX; comment_len++)
     {
