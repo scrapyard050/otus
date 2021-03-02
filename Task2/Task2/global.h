@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+#define READ16(p) ((p) += 2, extract_uint16_le((p) - 2))
+#define READ32(p) ((p) += 4, extract_uint32_le((p) - 4))
+
 // представление типа bool, поскольку stdbool.h отсутствует
 typedef enum {false, true} bool;
 

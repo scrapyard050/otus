@@ -38,18 +38,21 @@ bool find_eocdr( struct eocdr *eocdr_info, const uint8_t *src, size_t src_len )
         
         const uint8_t *p = &src[src_len - EOCDR_BASE_SZ - comment_len];
         // смещаемся в файле для поиска сигнатуры zip
-        uint32_t signature = extract_uint32_le( (p ) );
+        uint32_t signature = READ32( (p ) );
         if (signature == EOCDR_SIGNATURE)
         {
-            eocdr_info->disk_nbr =  extract_uint16_le(p - sizeof(uint16_t));
-            eocdr_info->cd_start_disk = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t)  );
-            eocdr_info->disk_cd_entries = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) );
-            eocdr_info->cd_entries = extract_uint16_le (p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t));
-            eocdr_info->cd_size = extract_uint32_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) );
-            eocdr_info->cd_offset = extract_uint32_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) - sizeof(uint32_t) );
-            eocdr_info->comment_len = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) - sizeof(uint32_t) - sizeof(uint16_t));
+            eocdr_info->disk_nbr =   READ16(p);
+            eocdr_info->cd_start_disk = READ16(p);
+            eocdr_info->disk_cd_entries = READ16(p);
+            eocdr_info->cd_entries = READ16(p);
+            eocdr_info->cd_size = READ32(p);
+            eocdr_info->cd_offset = READ32(p);
+            eocdr_info->comment_len = READ16(p);
             eocdr_info->comment = p;
-            return true;
+            if (eocdr_info->comment_len == comment_len)
+            {
+                    return true;
+            }
         }
     }
     return false;

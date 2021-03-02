@@ -48,7 +48,7 @@ static bool read_cfh(struct cfh *cfh, const uint8_t *src, size_t src_len, size_t
     }
     
     p = &src[offset];
-    signature = extract_uint32_le(p);
+    signature = READ32(p);
     if (signature != CFH_SIGNATURE)
     {
         return false;
