@@ -42,12 +42,12 @@ bool find_eocdr( struct eocdr *eocdr_info, const uint8_t *src, size_t src_len )
         if (signature == EOCDR_SIGNATURE)
         {
             eocdr_info->disk_nbr =  extract_uint16_le(p - sizeof(uint16_t));
-            eocdr_info->cd_start_disk = extract_uint16_le(p - sizeof(uint16_t) );
-            eocdr_info->disk_cd_entries = extract_uint16_le(p - sizeof(uint16_t));
-            eocdr_info->cd_entries = extract_uint16_le (p - sizeof(uint16_t));
-            eocdr_info->cd_size = extract_uint32_le(p -sizeof(uint32_t) );
-            eocdr_info->cd_offset = extract_uint32_le(p - sizeof(uint32_t) );
-            eocdr_info->comment_len = extract_uint16_le(p - sizeof(uint16_t));
+            eocdr_info->cd_start_disk = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t)  );
+            eocdr_info->disk_cd_entries = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) );
+            eocdr_info->cd_entries = extract_uint16_le (p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t));
+            eocdr_info->cd_size = extract_uint32_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) );
+            eocdr_info->cd_offset = extract_uint32_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) - sizeof(uint32_t) );
+            eocdr_info->comment_len = extract_uint16_le(p - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint16_t) - sizeof(uint32_t) - sizeof(uint32_t) - sizeof(uint16_t));
             eocdr_info->comment = p;
             return true;
         }
