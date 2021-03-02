@@ -47,6 +47,46 @@ static uint8_t *read_file(const char *filename, size_t *file_sz)
         return buf;
 }
 
+
+//static uint8_t *read_file(const char *filename, size_t *file_sz)
+//{
+//    FILE *f;
+//    uint8_t *buf;
+//    size_t buf_cap;
+//
+//    f = fopen(filename, "rb");
+//    PERROR_IF(f == NULL, "fopen");
+//
+//    fseek(f, 0L, SEEK_END);
+//
+//    size_t file_size = ftell(f);
+//
+//
+//    buf_cap = 4096;
+//    buf = xmalloc(buf_cap);
+//    memset(buf, '\0', buf_cap);
+//
+//    *file_sz = 0;
+//    fseek(f, -1, SEEK_END);
+//    while ( *file_sz < file_size )
+//    {
+//        if (buf_cap - *file_sz == 0)
+//        {
+//            buf_cap *= 2;
+//            buf = xrealloc(buf, buf_cap);
+//        }
+//
+//        *file_sz +=  fread(buf+ *file_sz, sizeof(u_int8_t), sizeof(u_int8_t), f);
+//        PERROR_IF(ferror(f), "fread");
+//        fseek(f, -(*file_sz + sizeof(u_int8_t) ), SEEK_END);
+//    }
+//
+//    PERROR_IF(fclose(f) != 0, "fclose");
+//
+//    return buf;
+//}
+
+
 static void list_zip(const char *filename)
 {
         uint8_t *zip_data;
