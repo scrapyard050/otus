@@ -57,8 +57,6 @@ void ReadEocdrData(FILE *file, size_t offset, eocdr *record )
     fread(record, sizeof(eocdr), COUNT_READ, file);
 }
 
-
-
 /// @brief Отображает файлы в архиве
 /// @param[in] file файл на чтение
 /// @param[in] offset_eocdr смещение на структуру eocdr
@@ -69,7 +67,7 @@ void ListFiles(FILE *file, size_t offset_eocdr)
     ReadEocdrData(file, offset_eocdr, &record);
     
     fseek(file, offset_eocdr - record.cd_size, SEEK_SET);
-    for (uint16_t i = 0; i < record.cd_entries; ++i)
+    for (uint16_t count = 0; count < record.cd_entries; ++count)
     {
         uint32_t signature;
         fread(&signature, sizeof(uint32_t), 1, file);
@@ -81,7 +79,7 @@ void ListFiles(FILE *file, size_t offset_eocdr)
 
       
         fseek(file, FILE_METADATA_SEEK, SEEK_CUR);
-        // Получаем размеры переменных велечин
+
         uint16_t name_len, extra_len, comment_len;
         fread(&name_len, sizeof(uint16_t), 1, file);
         fread(&extra_len, sizeof(uint16_t), 1, file);
@@ -93,9 +91,9 @@ void ListFiles(FILE *file, size_t offset_eocdr)
         fread(&name, name_len, 1, file);
     
         
-        for (int j = 0; j < name_len; ++j)
+        for (int fileName = 0; fileName < name_len; ++fileName)
         {
-            printf("%c", name[j]);
+            printf("%c", name[fileName]);
         }
         printf("\n");
         
