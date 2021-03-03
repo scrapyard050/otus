@@ -1,124 +1,138 @@
-
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
-#include "zip.h"
+#include <string.h>
+#include "errors.h"
+#include "eocdr.h"
 
 
-#define PERROR_IF(cond, msg) if (cond) { perror(msg); exit(1); }
+#define COUNT_READ 1
+#define FILE_METADATA_SEEK 24
+#define FILE_NAME_SEEK 12
 
-static void *xmalloc(size_t size)
+#define CFH_SIGNATURE 0x02014b50
+
+/// @brief Получаем размер файла
+/// @param[in] file файл для чтения данных
+///
+size_t Prepare( FILE *file )
 {
-        void *ptr = malloc(size);
-        PERROR_IF(ptr == NULL, "malloc");
-        return ptr;
+    size_t origin_pos = ftell(file);
+    fseek(file, 0L, SEEK_END);
+    size_t file_size = ftell(file);
+    fseek(file, origin_pos, SEEK_SET);
+    return file_size;
 }
 
-static void *xrealloc(void *ptr, size_t size)
+/// @brief Поиск zip
+/// @param[in] file файл для чтения
+/// @param[in] offset смещение eocdr
+/// @return true если конец записи центрального каталога найден
+///
+bool DetectZip(FILE *file, size_t *offset )
 {
-        ptr = realloc(ptr, size);
-        PERROR_IF(ptr == NULL, "realloc");
-        return ptr;
+    size_t file_size = Prepare(file);
+    size_t signature_eocdr = 0;
+    for( *offset = file_size - sizeof(eocdr); 0 != offset;  --(*offset) )
+    {
+        fseek(file, *offset, SEEK_SET);
+        fread(&signature_eocdr, sizeof(uint32_t), COUNT_READ, file);
+        if( signature_eocdr == EOCDR_SIGNATURE)
+        {
+            return true;
+        }
+    }
+
+   return false;
 }
 
-static uint8_t *read_file(const char *filename, size_t *file_sz)
+/// @brief Получение eocdr
+/// @param[in] file файл для чтения
+/// @param[in] offset смещение eocdr
+/// @param[out] record информация о eocdr
+///
+void ReadEocdrData(FILE *file, size_t offset, eocdr *record )
 {
-        FILE *f;
-        uint8_t *buf;
-        size_t buf_cap;
-
-        f = fopen(filename, "rb");
-        PERROR_IF(f == NULL, "fopen");
-
-        buf_cap = 4096;
-        buf = xmalloc(buf_cap);
-
-        *file_sz = 0;
-        while (feof(f) == 0) {
-                if (buf_cap - *file_sz == 0) {
-                        buf_cap *= 2;
-                        buf = xrealloc(buf, buf_cap);
-                }
-
-                *file_sz += fread(&buf[*file_sz], 1, buf_cap - *file_sz, f);
-                PERROR_IF(ferror(f), "fread");
-        }
-
-        PERROR_IF(fclose(f) != 0, "fclose");
-        return buf;
+    fseek(file, offset+sizeof(uint32_t), SEEK_SET);
+    fread(record, sizeof(eocdr), COUNT_READ, file);
 }
 
 
-//static uint8_t *read_file(const char *filename, size_t *file_sz)
-//{
-//    FILE *f;
-//    uint8_t *buf;
-//    size_t buf_cap;
-//
-//    f = fopen(filename, "rb");
-//    PERROR_IF(f == NULL, "fopen");
-//
-//    fseek(f, 0L, SEEK_END);
-//
-//    size_t file_size = ftell(f);
-//
-//
-//    buf_cap = 4096;
-//    buf = xmalloc(buf_cap);
-//    memset(buf, '\0', buf_cap);
-//
-//    *file_sz = 0;
-//    fseek(f, -1, SEEK_END);
-//    while ( *file_sz < file_size )
-//    {
-//        if (buf_cap - *file_sz == 0)
-//        {
-//            buf_cap *= 2;
-//            buf = xrealloc(buf, buf_cap);
-//        }
-//
-//        *file_sz +=  fread(buf+ *file_sz, sizeof(u_int8_t), sizeof(u_int8_t), f);
-//        PERROR_IF(ferror(f), "fread");
-//        fseek(f, -(*file_sz + sizeof(u_int8_t) ), SEEK_END);
-//    }
-//
-//    PERROR_IF(fclose(f) != 0, "fclose");
-//
-//    return buf;
-//}
 
-
-static void list_zip(const char *filename)
+/// @brief Отображает файлы в архиве
+/// @param[in] file файл на чтение
+/// @param[in] offset_eocdr смещение на структуру eocdr
+///
+void ListFiles(FILE *file, size_t offset_eocdr)
 {
-        uint8_t *zip_data;
-        size_t zip_sz;
-        zip_t z;
-        zipiter_t it;
-        zipmemb_t m;
-
-        printf("Listing ZIP archive: %s\n\n", filename);
-
-        zip_data = read_file(filename, &zip_sz);
-
-        if (!zip_read(&z, zip_data, zip_sz)) {
-                printf("Failed to parse ZIP file!\n");
-                exit(1);
+    eocdr record;
+    ReadEocdrData(file, offset_eocdr, &record);
+    
+    fseek(file, offset_eocdr - record.cd_size, SEEK_SET);
+    for (uint16_t i = 0; i < record.cd_entries; ++i)
+    {
+        uint32_t signature;
+        fread(&signature, sizeof(uint32_t), 1, file);
+        if (signature != CFH_SIGNATURE)
+        {
+            fprintf(stderr, "%s", "Not found central dir");
+            exit(NOT_FOUND_CENTRAL_DIR);
         }
 
-        if (z.comment_len != 0) {
-                printf("%.*s\n\n", (int)z.comment_len, z.comment);
-        }
+      
+        fseek(file, FILE_METADATA_SEEK, SEEK_CUR);
+        // Получаем размеры переменных велечин
+        uint16_t name_len, extra_len, comment_len;
+        fread(&name_len, sizeof(uint16_t), 1, file);
+        fread(&extra_len, sizeof(uint16_t), 1, file);
+        fread(&comment_len, sizeof(uint16_t), 1, file);
 
-        for (it = z.members_begin; it != z.members_end; it = m.next) {
-                m = zip_member(&z, it);
-                printf("%.*s\n", (int)m.name_len, m.name);
+  
+        fseek(file, FILE_NAME_SEEK, SEEK_CUR);
+        char name[name_len];
+        fread(&name, name_len, 1, file);
+    
+        
+        for (int j = 0; j < name_len; ++j)
+        {
+            printf("%c", name[j]);
         }
-
         printf("\n");
+        
+    
+        fseek(file, extra_len+comment_len, SEEK_CUR);
+    }
 
-        free(zip_data);
+    
 }
 
-int main(int argc, const char * argv[]) {
-    list_zip(argv[1]);
+int main(int argc, char * argv[] )
+{
+    // проверка входных параметров
+    if( argc != 2)
+    {
+        fprintf(stderr, "%s", "Invalid input data");
+        exit(INVALID_PARAM);
+    }
+    
+    // читаем файл
+    FILE* file;
+    if( ( file = fopen(argv[1], "rb") ) == NULL )
+    {
+        fprintf(stderr, "%s", " Error read file");
+        exit(ERROR_READ_FILE);
+    }
+    
+    size_t offset_eocdr = 0;
+    if( !DetectZip(file, &offset_eocdr) )
+    {
+        fprintf(stderr, "%s", " Zip file not detected");
+        exit(ZIP_NOT_FOUND);
+    }
+    
+    ListFiles(file, offset_eocdr);
+    
+    fclose(file);
+    
     return 0;
 }
