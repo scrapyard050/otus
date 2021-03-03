@@ -33,14 +33,12 @@ bool DetectZip(FILE *file, size_t *offset )
 {
     size_t file_size = Prepare(file);
     size_t signature_eocdr = 0;
-    for( *offset = file_size - sizeof(eocdr); 0 != offset;  --(*offset) )
+    fseek(file, file_size -EOCDR_BASE_SZ, SEEK_SET);
+    fread(&signature_eocdr, sizeof(uint32_t), COUNT_READ, file);
+    if( signature_eocdr == EOCDR_SIGNATURE)
     {
-        fseek(file, *offset, SEEK_SET);
-        fread(&signature_eocdr, sizeof(uint32_t), COUNT_READ, file);
-        if( signature_eocdr == EOCDR_SIGNATURE)
-        {
-            return true;
-        }
+        *offset = ftell(file) - sizeof(uint32_t);
+        return true;
     }
 
    return false;
@@ -53,7 +51,7 @@ bool DetectZip(FILE *file, size_t *offset )
 ///
 void ReadEocdrData(FILE *file, size_t offset, eocdr *record )
 {
-    fseek(file, offset+sizeof(uint32_t), SEEK_SET);
+    fseek(file, offset + sizeof(uint32_t), SEEK_SET);
     fread(record, sizeof(eocdr), COUNT_READ, file);
 }
 
